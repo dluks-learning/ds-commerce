@@ -3,12 +3,14 @@ package dev.dluks.dscommerce.services;
 import dev.dluks.dscommerce.dtos.ProductDTO;
 import dev.dluks.dscommerce.models.Product;
 import dev.dluks.dscommerce.repositories.ProductRepository;
+import dev.dluks.dscommerce.services.exceptions.DatabaseException;
+import dev.dluks.dscommerce.services.exceptions.ResourceNotFoundException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 @Service
 public class ProductService {
@@ -21,12 +23,9 @@ public class ProductService {
 
     @Transactional(readOnly = true)
     public ProductDTO findById(Long id) {
-        Optional<Product> result = productRepository.findById(id);
-
-        if (result.isEmpty()) {
-            throw new IllegalArgumentException("Product not found");
-        }
-        Product product = result.get();
+        Product product = productRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Id não encontrado")
+        );
         return new ProductDTO(product);
     }
 
@@ -39,25 +38,36 @@ public class ProductService {
     @Transactional
     public ProductDTO insert(ProductDTO dto) {
         Product toInsert = new Product();
-        copyDToToProduct(dto, toInsert);
+        copyDTOToProduct(dto, toInsert);
         toInsert = productRepository.save(toInsert);
         return new ProductDTO(toInsert);
     }
 
     @Transactional
     public ProductDTO update(Long id, ProductDTO dto) {
+        productRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Id não encontrado")
+        );
         Product toUpdate = productRepository.getReferenceById(id);
-        copyDToToProduct(dto, toUpdate);
+        copyDTOToProduct(dto, toUpdate);
         toUpdate = productRepository.save(toUpdate);
         return new ProductDTO(toUpdate);
     }
 
-    @Transactional
+    @Transactional(propagation = Propagation.SUPPORTS)
     public void delete(Long id) {
-        productRepository.deleteById(id);
+        if (!productRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Recurso não encontrado");
+        }
+        try {
+            productRepository.deleteById(id);
+        }
+        catch (DataIntegrityViolationException e) {
+            throw new DatabaseException("Falha de integridade referencial");
+        }
     }
 
-    private void copyDToToProduct(ProductDTO dto, Product toUpdate) {
+    private void copyDTOToProduct(ProductDTO dto, Product toUpdate) {
         toUpdate.setName(dto.name());
         toUpdate.setDescription(dto.description());
         toUpdate.setPrice(dto.price());
