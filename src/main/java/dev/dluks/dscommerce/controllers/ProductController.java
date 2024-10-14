@@ -1,6 +1,7 @@
 package dev.dluks.dscommerce.controllers;
 
 import dev.dluks.dscommerce.dtos.ProductDTO;
+import dev.dluks.dscommerce.dtos.ProductMinDTO;
 import dev.dluks.dscommerce.services.ProductService;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
@@ -31,12 +32,12 @@ public class ProductController {
 
     // sample query: http://localhost:8080/products?size=12&page=0&sort=name,desc
     @GetMapping({"", "/"})
-    public ResponseEntity<Page<ProductDTO>> findAll(
+    public ResponseEntity<Page<ProductMinDTO>> findAll(
             @RequestParam(name = "name", defaultValue = "") String name,
             Pageable pageable) {
 
-        Page<ProductDTO> productDTOPage = productService.findAll(name, pageable);
-        return ResponseEntity.ok(productDTOPage);
+        Page<ProductMinDTO> productMinDTOPage = productService.findAll(name, pageable);
+        return ResponseEntity.ok(productMinDTOPage);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN')")
