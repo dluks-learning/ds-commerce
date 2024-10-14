@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -38,6 +39,7 @@ public class ProductController {
         return ResponseEntity.ok(productDTOPage);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PostMapping({"", "/"})
     public ResponseEntity<ProductDTO> insert(
             @Valid @RequestBody ProductDTO dto) {
@@ -48,6 +50,7 @@ public class ProductController {
         return ResponseEntity.created(uri).body(productDTO);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ProductDTO> update(
             @PathVariable Long id,
@@ -57,6 +60,7 @@ public class ProductController {
         return ResponseEntity.ok(productDTO);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
             @PathVariable Long id) {
