@@ -1,7 +1,9 @@
 package dev.dluks.dscommerce.services;
 
+import dev.dluks.dscommerce.dtos.CategoryDTO;
 import dev.dluks.dscommerce.dtos.ProductDTO;
 import dev.dluks.dscommerce.dtos.ProductMinDTO;
+import dev.dluks.dscommerce.models.Category;
 import dev.dluks.dscommerce.models.Product;
 import dev.dluks.dscommerce.repositories.ProductRepository;
 import dev.dluks.dscommerce.services.exceptions.DatabaseException;
@@ -68,9 +70,16 @@ public class ProductService {
     }
 
     private void copyDTOToProduct(ProductDTO dto, Product toUpdate) {
-        toUpdate.setName(dto.name());
-        toUpdate.setDescription(dto.description());
-        toUpdate.setPrice(dto.price());
-        toUpdate.setImgUrl(dto.imgUrl());
+        toUpdate.setName(dto.getName());
+        toUpdate.setDescription(dto.getDescription());
+        toUpdate.setPrice(dto.getPrice());
+        toUpdate.setImgUrl(dto.getImgUrl());
+
+        toUpdate.getCategories().clear();
+        for (CategoryDTO categoryDTO : dto.getCategories()) {
+            Category category = new Category();
+            category.setId(categoryDTO.getId());
+            toUpdate.getCategories().add(category);
+        }
     }
 }

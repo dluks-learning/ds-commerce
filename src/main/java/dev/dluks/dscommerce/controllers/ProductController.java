@@ -47,7 +47,7 @@ public class ProductController {
 
         ProductDTO productDTO = productService.insert(dto);
 
-        URI uri = URI.create("/products/" + productDTO.id());
+        URI uri = URI.create("/products/" + productDTO.getId());
         return ResponseEntity.created(uri).body(productDTO);
     }
 
