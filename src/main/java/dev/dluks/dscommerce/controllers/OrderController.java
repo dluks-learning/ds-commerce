@@ -2,12 +2,12 @@ package dev.dluks.dscommerce.controllers;
 
 import dev.dluks.dscommerce.dtos.OrderDTO;
 import dev.dluks.dscommerce.services.OrderService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping("/orders")
@@ -26,6 +26,17 @@ public class OrderController {
 
         OrderDTO orderDTO = orderService.findById(id);
         return ResponseEntity.ok(orderDTO);
+    }
+
+    @PreAuthorize("hasAnyRole('CLIENT')")
+    @PostMapping()
+    public ResponseEntity<OrderDTO> createOrder(
+            @Valid @RequestBody OrderDTO dto) {
+
+        OrderDTO orderDTO = orderService.insert(dto);
+
+        URI uri = URI.create("/orders/" + orderDTO.getId());
+        return ResponseEntity.created(uri).body(orderDTO);
     }
 
 }
