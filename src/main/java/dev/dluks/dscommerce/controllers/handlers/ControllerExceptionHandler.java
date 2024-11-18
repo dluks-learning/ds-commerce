@@ -3,6 +3,7 @@ package dev.dluks.dscommerce.controllers.handlers;
 import dev.dluks.dscommerce.dtos.CustomErrorDTO;
 import dev.dluks.dscommerce.dtos.ValidationErrorDTO;
 import dev.dluks.dscommerce.services.exceptions.DatabaseException;
+import dev.dluks.dscommerce.services.exceptions.ForbiddenException;
 import dev.dluks.dscommerce.services.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,21 @@ public class ControllerExceptionHandler {
             HttpServletRequest request) {
 
         HttpStatus status = HttpStatus.CONFLICT;
+        CustomErrorDTO error = new CustomErrorDTO(
+                Instant.now(),
+                status.value(),
+                e.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<CustomErrorDTO> forbidden(
+            ForbiddenException e,
+            HttpServletRequest request) {
+
+        HttpStatus status = HttpStatus.FORBIDDEN;
         CustomErrorDTO error = new CustomErrorDTO(
                 Instant.now(),
                 status.value(),
